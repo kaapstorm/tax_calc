@@ -49,8 +49,7 @@ $$
 $$
 
 Where Band Rate is one of 8.75%, 33.75%, or 39.35%, depending on the
-Income Tax band you occupy based on total income after allowances.[3]
-[9][10][1][7]
+Income Tax band you occupy based on total income after allowances.[3][9][10][1][7]
 
 [1](https://www.1stformations.co.uk/blog/dividend-tax-allowance/)
 [2](https://www.accaglobal.com/uk/en/technical-activities/uk-tech/in-practice/2023/may/salary-dividends-tax-calculations.html)
