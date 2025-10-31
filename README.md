@@ -72,9 +72,4 @@ No Python installation required.
    uv run pyinstaller --onefile --name optimise_tax --console optimise_tax.py
    ```
 
-   Or use the build script:
-   ```shell
-   uv run build_exe.py
-   ```
-
 3. The executable will be created in `dist/optimise_tax.exe`
