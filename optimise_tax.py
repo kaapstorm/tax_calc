@@ -77,31 +77,6 @@ def calc_div_tax(div, wage, country):
     return owed
 
 
-def get_marginal_rate_wage(wage, country):
-    """Get marginal tax rate for next £1 of wage income."""
-    pa = personal_allowance(wage)
-    if wage < pa:
-        return 0.0
-    _, bands = get_tax_bands(country)
-    taxable = wage - pa
-    for band_limit, rate in bands:
-        if taxable <= band_limit:
-            return rate
-    return bands[-1][1]
-
-
-def get_marginal_rate_dividend(total_income, wage, country):
-    """Get marginal tax rate for next £1 of dividend income."""
-    dividend = total_income - wage
-    allowance, bands = get_dividend_bands(country)
-    if dividend < allowance:
-        return 0.0
-    for band_limit, rate in bands:
-        if total_income <= band_limit:
-            return rate
-    return bands[-1][1]
-
-
 def total_tax_split(amount, country):
     """
     Find optimal wage/dividend split using intersection method.
