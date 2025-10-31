@@ -3,9 +3,12 @@ import argparse
 from pathlib import Path
 
 
-def get_tax_bands(country):
-    # Personal allowance and relevant bands
+def get_tax_bands(country, income):
+    # Personal allowance with income-dependent reduction
     allowance = 12570
+    if income > 100000:
+        reduction = (income - 100000) // 2
+        allowance = max(0, allowance - reduction)
 
     if country == 'sco':
         bands = [
@@ -34,18 +37,9 @@ def get_dividend_bands(country):
     return allowance, bands
 
 
-def personal_allowance(income):
-    # Allowance is removed £1 for every £2 over £100,000 (UK-wide)
-    pa = 12570
-    if income > 100000:
-        reduction = (income - 100000) // 2
-        pa = max(0, pa - reduction)
-    return pa
-
-
 def calc_wage_tax(wage, country):
-    pa, bands = get_tax_bands(country)
-    taxable = max(0, wage - personal_allowance(wage))
+    pa, bands = get_tax_bands(country, wage)
+    taxable = max(0, wage - pa)
     owed = 0
     last = 0
     for band_limit, rate in bands:
@@ -86,13 +80,14 @@ def get_critical_wage_points(income, country):
     """
     critical_wages = {0, income}
 
+    # Get personal allowance for this income level
+    pa, wage_bands = get_tax_bands(country, income)
+
     # Add personal allowance boundary
-    pa = personal_allowance(income)
     if 0 < pa < income:
         critical_wages.add(pa)
 
     # Add wage band boundaries
-    _, wage_bands = get_tax_bands(country)
     for band_limit, _ in wage_bands:
         if band_limit != float('inf'):
             wage_at_boundary = band_limit + pa
