@@ -26,16 +26,6 @@ If you have the standalone executable (`optimise_tax.exe`):
 - `--country {eng,sco,wal,ni}` - Country code (default: eng)
 - `--graph` - Render and save a graph in PNG showing the intersection of tax on wages and dividends
 
-**To obtain the Windows executable:**
-
-1. Open https://github.com/kaapstorm/tax_calc/ in your browser.
-2. Navigate to the "Actions" tab.
-3. Open the latest workflow run.
-4. Download the `optimise-tax-windows-exe` artifact.
-5. Unzip `optimise-tax-windows-exe.zip` and extract `optimise_tax.exe`.
-
-No Python installation required.
-
 </details>
 
 <details>
@@ -60,7 +50,17 @@ $ uv run optimise_tax.py 40000 --graph
 
 </details>
 
-## Building a Windows Executable Locally
+## Downloading the Windows executable
+
+1. Open https://github.com/kaapstorm/tax_calc/ in your browser.
+2. Navigate to the "Actions" tab.
+3. Open the latest workflow run.
+4. Download the `optimise-tax-windows-exe` artifact.
+5. Unzip `optimise-tax-windows-exe.zip` and extract `optimise_tax.exe`.
+
+No Python installation required.
+
+## Building a Windows executable locally
 
 1. Install development dependencies:
    ```shell
