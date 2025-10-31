@@ -77,7 +77,42 @@ def calc_div_tax(div, wage, country):
     return owed
 
 
-def total_tax_split(amount, country):
+def get_critical_wage_points(income, country):
+    """
+    Calculate all critical wage points where tax rates change.
+
+    Returns sorted list of wages where the marginal tax rate changes
+    for either wage tax or dividend tax calculations.
+    """
+    critical_wages = {0, income}
+
+    # Add personal allowance boundary
+    pa = personal_allowance(income)
+    if 0 < pa < income:
+        critical_wages.add(pa)
+
+    # Add wage band boundaries
+    _, wage_bands = get_tax_bands(country)
+    for band_limit, _ in wage_bands:
+        if band_limit != float('inf'):
+            wage_at_boundary = band_limit + pa
+            if 0 < wage_at_boundary < income:
+                critical_wages.add(wage_at_boundary)
+
+    # Add dividend band boundaries
+    _, div_bands = get_dividend_bands(country)
+    for band_limit, _ in div_bands:
+        if band_limit != float('inf') and 0 < band_limit < income:
+            critical_wages.add(band_limit)
+
+    # For high earners, add £100k boundary
+    if income > 100000:
+        critical_wages.add(100000)
+
+    return sorted(critical_wages)
+
+
+def find_optimal_split(amount, country):
     """
     Find optimal wage/dividend split using intersection method.
 
@@ -85,39 +120,15 @@ def total_tax_split(amount, country):
     rates change (band boundaries). We evaluate all critical points
     and return the split with minimum total tax.
     """
-    # Collect all critical points to check
-    critical_points = {0, amount}
-
-    # Add personal allowance boundary
-    pa = personal_allowance(amount)
-    if 0 < pa < amount:
-        critical_points.add(pa)
-
-    # Add wage band boundaries
-    _, wage_bands = get_tax_bands(country)
-    for band_limit, _ in wage_bands:
-        if band_limit != float('inf'):
-            # Wage bands are relative to taxable income
-            wage_at_boundary = band_limit + pa
-            if 0 < wage_at_boundary < amount:
-                critical_points.add(wage_at_boundary)
-
-    # Add dividend band boundaries
-    _, div_bands = get_dividend_bands(country)
-    for band_limit, _ in div_bands:
-        if band_limit != float('inf') and 0 < band_limit < amount:
-            critical_points.add(band_limit)
-
-    # For high earners, add £100k boundary (where PA starts tapering)
-    if amount > 100000:
-        critical_points.add(100000)
+    # Get all critical wage points
+    critical_wages = get_critical_wage_points(amount, country)
 
     # Evaluate tax at each critical point
     best_wage = 0
     best_dividend = amount
     min_tax = float('inf')
 
-    for wage in sorted(critical_points):
+    for wage in critical_wages:
         dividend = amount - wage
         wage_tax = calc_wage_tax(wage, country)
         div_tax = calc_div_tax(dividend, wage, country)
@@ -133,19 +144,23 @@ def total_tax_split(amount, country):
 
 def generate_graph(income, country, best_wage, best_dividend, min_tax):
     """
-    Generate and save a graph showing total tax across wage/dividend
-    splits.
+    Generate and save a graph showing total tax across wage/dividend splits.
+
+    Uses line segments at critical points (tax band boundaries) for
+    mathematical precision and computational efficiency.
     """
     import matplotlib.pyplot as plt
 
-    # Generate data points for the graph
+    # Get all critical wage points
+    critical_wages = get_critical_wage_points(income, country)
+
+    # Calculate tax at each critical point
     wages = []
-    total_taxes = []
     wage_taxes = []
     div_taxes = []
+    total_taxes = []
 
-    step = max(1, int(income / 500))  # ~500 points
-    for wage in range(0, int(income) + 1, step):
+    for wage in critical_wages:
         dividend = income - wage
         wage_tax = calc_wage_tax(wage, country)
         div_tax = calc_div_tax(dividend, wage, country)
@@ -159,10 +174,8 @@ def generate_graph(income, country, best_wage, best_dividend, min_tax):
     # Create the plot
     fig, ax = plt.subplots(figsize=(12, 7))
 
-    # Plot total tax, wage tax, and dividend tax
-    ax.plot(
-        wages, total_taxes, label='Total Tax', linewidth=2, color='red'
-    )
+    # Plot as connected line segments
+    ax.plot(wages, total_taxes, label='Total Tax', linewidth=2, color='red')
     ax.plot(
         wages,
         wage_taxes,
@@ -200,8 +213,6 @@ def generate_graph(income, country, best_wage, best_dividend, min_tax):
     )
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)
-
-    # Format axes
     ax.ticklabel_format(style='plain', axis='both')
 
     # Save the figure
@@ -216,7 +227,7 @@ def generate_graph(income, country, best_wage, best_dividend, min_tax):
 def main():
     parser = argparse.ArgumentParser(
         description='Compute optimum split between wages and dividends for a '
-                    'given total income.'
+        'given total income.'
     )
     parser.add_argument(
         '--country', choices=['eng', 'sco', 'wal', 'ni'], default='eng'
@@ -225,12 +236,12 @@ def main():
         '--graph',
         action='store_true',
         help='Render and save a graph in PNG showing the intersection of tax '
-             'on wages and dividends',
+        'on wages and dividends',
     )
     parser.add_argument('income', type=float, help='Total income (GBP)')
     args = parser.parse_args()
 
-    wage, dividend, tax = total_tax_split(args.income, args.country)
+    wage, dividend, tax = find_optimal_split(args.income, args.country)
 
     print(f'For £{args.income:.2f} in {args.country.upper()}, optimum split:')
     print(f'Wages: £{wage:.2f}')
