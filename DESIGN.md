@@ -19,11 +19,12 @@ $$
 \end{cases}
 $$
 
-Note: The first £500 of dividend income each tax year is tax-free due to
-the dividend allowance. Any above this is taxed according to the above
-rates. Your tax band is determined by your total income
-(wages + dividends + other taxable income) minus your Personal
-Allowance (typically £12,570 per year).[1][3][7][9][10]
+> [!NOTE]
+> The first £500 of dividend income each tax year is tax-free due to
+> the dividend allowance. Any above this is taxed according to the above
+> rates. Your tax band is determined by your total income
+> (wages + dividends + other taxable income) minus your Personal
+> Allowance (typically £12,570 per year).[1][3][7][9][10]
 
 ### Worked Example
 
